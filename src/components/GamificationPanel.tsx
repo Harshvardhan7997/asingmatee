@@ -33,7 +33,7 @@ const GamificationPanel = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {ALL_BADGES.map(badge => {
             const isUnlocked = unlockedIds.has(badge.id);
-            const IconComponent = (LucideIcons as Record<string, React.FC<{ className?: string }>>)[badge.icon] || Star;
+            const IconComponent = (LucideIcons as unknown as Record<string, React.FC<{ className?: string }>>)[badge.icon] || Star;
             return (
               <motion.div
                 key={badge.id}
