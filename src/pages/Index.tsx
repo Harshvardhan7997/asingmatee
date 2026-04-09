@@ -1,16 +1,83 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState, useCallback } from 'react';
+import { AnimatePresence } from 'framer-motion';
+import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import BootSequence from '@/components/BootSequence';
+import LoginPage from '@/components/LoginPage';
+import AppSidebar from '@/components/AppSidebar';
+import StudentDashboard from '@/components/StudentDashboard';
+import AdminDashboard from '@/components/AdminDashboard';
+import CodeEditor from '@/components/CodeEditor';
+import GamificationPanel from '@/components/GamificationPanel';
+import AssignmentsPanel from '@/components/AssignmentsPanel';
+import VisionScanner from '@/components/VisionScanner';
+import SubjectsPanel from '@/components/SubjectsPanel';
+import SubjectGames from '@/components/SubjectGames';
+import VideoCall from '@/components/VideoCall';
 
-// IMPORTANT: Fully REPLACE this with your own code
-const PlaceholderIndex = () => {
-  // PLACEHOLDER: Replace this entire return statement with the user's app.
-  // The inline background color is intentionally not part of the design system.
+const AppContent = () => {
+  const { user, isImpersonating } = useAuth();
+  const [booted, setBooted] = useState(() => !!localStorage.getItem('astraeus_booted'));
+  const [activeTab, setActiveTab] = useState('dashboard');
+
+  const handleBootComplete = useCallback(() => {
+    setBooted(true);
+    localStorage.setItem('astraeus_booted', '1');
+  }, []);
+
+  if (!booted) return <BootSequence onComplete={handleBootComplete} />;
+  if (!user) return <LoginPage />;
+
+  const effectiveRole = isImpersonating ? 'student' : user.role;
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'dashboard':
+        return effectiveRole === 'admin' ? <AdminDashboard /> : <StudentDashboard />;
+      case 'editor':
+        return <CodeEditor />;
+      case 'gamification':
+        return <GamificationPanel />;
+      case 'assignments':
+        return <AssignmentsPanel />;
+      case 'camera':
+        return <VisionScanner />;
+      case 'subjects':
+        return <SubjectsPanel />;
+      case 'games':
+        return <SubjectGames />;
+      case 'students':
+        return <AdminDashboard />;
+      case 'analytics':
+        return <AdminDashboard />;
+      case 'integrity':
+        return <AdminDashboard />;
+      case 'video-call':
+        return <VideoCall />;
+      case 'leaderboard':
+        return <GamificationPanel />;
+      default:
+        return <StudentDashboard />;
+    }
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#fcfbf8' }}>
-      <img data-lovable-blank-page-placeholder="REMOVE_THIS" src="/placeholder.svg" alt="Your app will live here!" />
+    <div className="flex h-screen bg-background overflow-hidden">
+      <AppSidebar activeTab={activeTab} onTabChange={setActiveTab} />
+      <main className="flex-1 overflow-auto scanline">
+        <AnimatePresence mode="wait">
+          <div key={activeTab} className="h-full">
+            {renderContent()}
+          </div>
+        </AnimatePresence>
+      </main>
     </div>
   );
 };
 
-const Index = PlaceholderIndex;
+const Index = () => (
+  <AuthProvider>
+    <AppContent />
+  </AuthProvider>
+);
 
 export default Index;
