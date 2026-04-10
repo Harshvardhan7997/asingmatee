@@ -30,7 +30,7 @@ const AppSidebar = ({ activeTab, onTabChange }: SidebarProps) => {
     { id: 'leaderboard', label: 'Leaderboard', icon: BarChart3 },
   ];
 
-  const adminTabs = [
+  const teacherTabs = [
     { id: 'dashboard', label: 'Command Center', icon: LayoutDashboard },
     { id: 'students', label: 'Students', icon: Users },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
@@ -44,7 +44,7 @@ const AppSidebar = ({ activeTab, onTabChange }: SidebarProps) => {
     { id: 'leaderboard', label: 'Leaderboard', icon: BarChart3 },
   ];
 
-  const tabs = effectiveRole === 'admin' ? adminTabs : studentTabs;
+  const tabs = (effectiveRole === 'teacher' || effectiveRole === 'admin') ? teacherTabs : studentTabs;
 
   return (
     <motion.aside
@@ -52,7 +52,6 @@ const AppSidebar = ({ activeTab, onTabChange }: SidebarProps) => {
       animate={{ x: 0, width: collapsed ? 64 : 240 }}
       className="h-screen bg-sidebar border-r border-sidebar-border flex flex-col overflow-hidden shrink-0"
     >
-      {/* Header */}
       <div className="p-4 flex items-center justify-between border-b border-sidebar-border">
         {!collapsed && (
           <span className="text-primary font-mono font-bold text-sm text-glow-cyan">ASTRAEUS</span>
@@ -62,7 +61,6 @@ const AppSidebar = ({ activeTab, onTabChange }: SidebarProps) => {
         </button>
       </div>
 
-      {/* User info */}
       {!collapsed && user && (
         <div className="p-4 border-b border-sidebar-border">
           <div className="flex items-center gap-3">
@@ -72,13 +70,13 @@ const AppSidebar = ({ activeTab, onTabChange }: SidebarProps) => {
             <div className="min-w-0">
               <p className="text-sm font-medium truncate">{user.username}</p>
               <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <span>Lv.{user.level}</span>
+                <span className="capitalize">{user.role}</span>
+                <span>• Lv.{user.level}</span>
                 <Flame className="w-3 h-3 text-neon-orange" />
                 <span>{user.streak}</span>
               </div>
             </div>
           </div>
-          {/* XP Bar */}
           <div className="mt-2">
             <div className="flex justify-between text-[10px] text-muted-foreground">
               <span>{user.xp} XP</span>
@@ -96,7 +94,6 @@ const AppSidebar = ({ activeTab, onTabChange }: SidebarProps) => {
         </div>
       )}
 
-      {/* Nav */}
       <nav className="flex-1 p-2 space-y-0.5 overflow-y-auto">
         {tabs.map(tab => (
           <button
@@ -115,9 +112,8 @@ const AppSidebar = ({ activeTab, onTabChange }: SidebarProps) => {
         ))}
       </nav>
 
-      {/* Footer */}
       <div className="p-2 border-t border-sidebar-border space-y-0.5">
-        {user?.role === 'admin' && (
+        {(user?.role === 'teacher' || user?.role === 'admin') && (
           <button
             onClick={toggleImpersonation}
             className={cn(

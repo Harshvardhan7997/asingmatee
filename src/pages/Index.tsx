@@ -15,7 +15,7 @@ import SubjectGames from '@/components/SubjectGames';
 import VideoCall from '@/components/VideoCall';
 
 const AppContent = () => {
-  const { user, isImpersonating } = useAuth();
+  const { user, loading, isImpersonating } = useAuth();
   const [booted, setBooted] = useState(() => !!localStorage.getItem('astraeus_booted'));
   const [activeTab, setActiveTab] = useState('dashboard');
 
@@ -25,6 +25,11 @@ const AppContent = () => {
   }, []);
 
   if (!booted) return <BootSequence onComplete={handleBootComplete} />;
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="text-primary font-mono animate-pulse">Loading...</div>
+    </div>
+  );
   if (!user) return <LoginPage />;
 
   const effectiveRole = isImpersonating ? 'student' : user.role;
@@ -32,7 +37,7 @@ const AppContent = () => {
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return effectiveRole === 'admin' ? <AdminDashboard /> : <StudentDashboard />;
+        return effectiveRole === 'admin' || effectiveRole === 'teacher' ? <AdminDashboard /> : <StudentDashboard />;
       case 'editor':
         return <CodeEditor />;
       case 'gamification':
